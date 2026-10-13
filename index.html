@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Keuangan Masjid Al-Hijrah</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#f4f6f9;
+}
+
+header{
+background:#0f766e;
+color:#fff;
+text-align:center;
+padding:20px;
+}
+
+.container{
+width:95%;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:#fff;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+box-shadow:0 2px 6px rgba(0,0,0,.15);
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+button{
+padding:10px 15px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+margin-right:5px;
+}
+
+.btn-save{background:#16a34a;color:white;}
+.btn-cancel{background:#6b7280;color:white;}
+.btn-print{background:#2563eb;color:white;}
+.btn-edit{background:#f59e0b;color:white;}
+.btn-delete{background:#dc2626;color:white;}
+
+.summary{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:10px;
+margin-bottom:20px;
+}
+
+.box{
+padding:20px;
+border-radius:10px;
+color:white;
+}
+
+.masuk{background:#16a34a;}
+.keluar{background:#dc2626;}
+.saldo{background:#2563eb;}
+.yatim{background:#7c3aed;}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+table th,
+table td{
+border:1px solid #ddd;
+padding:8px;
+}
+
+table th{
+background:#0f766e;
+color:white;
+}
+
+.filter{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:10px;
+}
+
+.filter select{
+flex:1;
+min-width:150px;
+}
+
+footer{
+background:#0f766e;
+color:white;
+text-align:center;
+padding:15px;
+margin-top:20px;
+}
+
+.version{
+font-size:12px;
+margin-top:5px;
+}
+</style>
+
+</head>
+<body>
+
+<header>
+<h1>MASJID AL-HIJRAH</h1>
+<p>Sistem Keuangan Kas Masjid & Dana Yatim Piatu</p>
+</header>
+
+<div class="container">
+
+<div class="card">
+<h2>Input Transaksi</h2>
+
+<input type="date" id="tanggal">
+
+<select id="jenis">
+<option value="Pemasukan">Pemasukan</option>
+<option value="Pengeluaran">Pengeluaran</option>
+</select>
+
+<select id="kategori">
+<option value="Kas Masjid">Kas Masjid</option>
+<option value="Dana Yatim">Dana Yatim Piatu</option>
+</select>
+
+<input type="text" id="keterangan" placeholder="Keterangan">
+<input type="number" id="jumlah" placeholder="Jumlah">
+
+<button class="btn-save" onclick="simpanData()">Simpan Data</button>
+<button class="btn-cancel" onclick="batalEdit()">Batal Edit</button>
+</div>
+
+<div class="card">
+<h2>Data Pengurus</h2>
+
+<input type="text" id="namaKetua" placeholder="Nama Ketua DKM">
+<input type="text" id="namaBendahara" placeholder="Nama Bendahara">
+
+<button class="btn-save" onclick="simpanPengurus()">
+Simpan Data Pengurus
+</button>
+
+</div>
+
+<div class="summary">
+
+<div class="box masuk">
+<h3>Pemasukan Kas Masjid</h3>
+<h2 id="masjidMasuk">Rp 0</h2>
+</div>
+
+<div class="box keluar">
+<h3>Pengeluaran Kas Masjid</h3>
+<h2 id="masjidKeluar">Rp 0</h2>
+</div>
+
+<div class="box saldo">
+<h3>Saldo Kas Masjid</h3>
+<h2 id="saldoMasjid">Rp 0</h2>
+</div>
+
+<div class="box yatim">
+<h3>Pemasukan Dana Yatim</h3>
+<h2 id="yatimMasuk">Rp 0</h2>
+</div>
+
+<div class="box keluar">
+<h3>Pengeluaran Dana Yatim</h3>
+<h2 id="yatimKeluar">Rp 0</h2>
+</div>
+
+<div class="box saldo">
+<h3>Saldo Dana Yatim</h3>
+<h2 id="saldoYatim">Rp 0</h2>
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>Data Transaksi</h2>
+
+<div class="filter">
+
+<select id="filterBulan" onchange="tampilkanData()">
+<option value="">Semua Bulan</option>
+<option value="01">Januari</option>
+<option value="02">Februari</option>
+<option value="03">Maret</option>
+<option value="04">April</option>
+<option value="05">Mei</option>
+<option value="06">Juni</option>
+<option value="07">Juli</option>
+<option value="08">Agustus</option>
+<option value="09">September</option>
+<option value="10">Oktober</option>
+<option value="11">November</option>
+<option value="12">Desember</option>
+</select>
+
+<select id="filterTahun" onchange="tampilkanData()">
+<option value="">Semua Tahun</option>
+</select>
+
+<button class="btn-print" onclick="cetakLaporan()">
+Cetak Laporan
+</button>
+
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>Tanggal</th>
+<th>Jenis</th>
+<th>Kategori</th>
+<th>Keterangan</th>
+<th>Jumlah</th>
+<th>Aksi</th>
+</tr>
+</thead>
+
+<tbody id="tbody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<footer>
+<div>© 2026 BurhanFath</div>
+<div>Sistem Keuangan Masjid Al-Hijrah</div>
+<div class="version">Version 1.0.0</div>
+</footer>
+
+<script>
+
+let data=JSON.parse(localStorage.getItem("keuanganMasjid"))||[];
+let editIndex=-1;
+
+function rupiah(angka){
+return new Intl.NumberFormat('id-ID',{
+style:'currency',
+currency:'IDR'
+}).format(angka);
+}
+
+function simpanPengurus(){
+
+localStorage.setItem(
+"namaKetua",
+document.getElementById("namaKetua").value
+);
+
+localStorage.setItem(
+"namaBendahara",
+document.getElementById("namaBendahara").value
+);
+
+alert("Data pengurus berhasil disimpan");
+
+}
+
+function loadPengurus(){
+
+document.getElementById("namaKetua").value=
+localStorage.getItem("namaKetua")||"";
+
+document.getElementById("namaBendahara").value=
+localStorage.getItem("namaBendahara")||"";
+
+}
+
+function isiTahun(){
+
+let select=document.getElementById("filterTahun");
+
+for(let t=new Date().getFullYear()+1;t>=2020;t--){
+
+let option=document.createElement("option");
+option.value=t;
+option.text=t;
+
+select.appendChild(option);
+
+}
+
+}
+
+function simpanData(){
+
+let transaksi={
+tanggal:tanggal.value,
+jenis:jenis.value,
+kategori:kategori.value,
+keterangan:keterangan.value,
+jumlah:Number(jumlah.value)
+};
+
+if(!transaksi.tanggal || !transaksi.keterangan || transaksi.jumlah<=0){
+alert("Lengkapi data");
+return;
+}
+
+if(editIndex==-1){
+data.push(transaksi);
+}else{
+data[editIndex]=transaksi;
+editIndex=-1;
+document.querySelector(".btn-save").innerHTML="Simpan Data";
+}
+
+localStorage.setItem("keuanganMasjid",JSON.stringify(data));
+
+resetForm();
+tampilkanData();
+
+}
+
+function tampilkanData(){
+
+let bulanFilter=filterBulan.value;
+let tahunFilter=filterTahun.value;
+
+tbody.innerHTML="";
+
+let masjidMasuk=0;
+let masjidKeluar=0;
+let yatimMasuk=0;
+let yatimKeluar=0;
+let saldoMasjid=0;
+let saldoYatim=0;
+
+data.forEach((d,index)=>{
+
+let tgl=new Date(d.tanggal);
+let bulan=String(tgl.getMonth()+1).padStart(2,"0");
+let tahun=String(tgl.getFullYear());
+
+if((bulanFilter&&bulan!==bulanFilter) || (tahunFilter&&tahun!==tahunFilter)){
+return;
+}
+
+if(d.kategori==="Kas Masjid"){
+if(d.jenis==="Pemasukan"){
+masjidMasuk+=d.jumlah;
+saldoMasjid+=d.jumlah;
+}else{
+masjidKeluar+=d.jumlah;
+saldoMasjid-=d.jumlah;
+}
+}
+
+if(d.kategori==="Dana Yatim"){
+if(d.jenis==="Pemasukan"){
+yatimMasuk+=d.jumlah;
+saldoYatim+=d.jumlah;
+}else{
+yatimKeluar+=d.jumlah;
+saldoYatim-=d.jumlah;
+}
+}
+
+tbody.innerHTML+=`
+<tr>
+<td>${d.tanggal}</td>
+<td>${d.jenis}</td>
+<td>${d.kategori}</td>
+<td>${d.keterangan}</td>
+<td>${rupiah(d.jumlah)}</td>
+<td>
+<button class="btn-edit" onclick="editData(${index})">Edit</button>
+<button class="btn-delete" onclick="hapusData(${index})">Hapus</button>
+</td>
+</tr>`;
+});
+
+document.getElementById("masjidMasuk").innerHTML=rupiah(masjidMasuk);
+document.getElementById("masjidKeluar").innerHTML=rupiah(masjidKeluar);
+document.getElementById("saldoMasjid").innerHTML=rupiah(saldoMasjid);
+document.getElementById("yatimMasuk").innerHTML=rupiah(yatimMasuk);
+document.getElementById("yatimKeluar").innerHTML=rupiah(yatimKeluar);
+document.getElementById("saldoYatim").innerHTML=rupiah(saldoYatim);
+
+}
+
+function editData(index){
+
+let d=data[index];
+
+tanggal.value=d.tanggal;
+jenis.value=d.jenis;
+kategori.value=d.kategori;
+keterangan.value=d.keterangan;
+jumlah.value=d.jumlah;
+
+editIndex=index;
+
+window.scrollTo({top:0,behavior:'smooth'});
+document.querySelector(".btn-save").innerHTML="Update Data";
+
+}
+
+function batalEdit(){
+editIndex=-1;
+resetForm();
+document.querySelector(".btn-save").innerHTML="Simpan Data";
+}
+
+function hapusData(index){
+
+if(confirm("Yakin hapus data?")){
+
+data.splice(index,1);
+
+localStorage.setItem(
+"keuanganMasjid",
+JSON.stringify(data)
+);
+
+tampilkanData();
+
+}
+
+}
+
+function resetForm(){
+tanggal.value="";
+keterangan.value="";
+jumlah.value="";
+}
+
+function cetakLaporan(){
+
+let namaKetua=localStorage.getItem("namaKetua")||"________________";
+let namaBendahara=localStorage.getItem("namaBendahara")||"________________";
+
+let tabel = document.querySelector("table").cloneNode(true);
+
+// Hapus header kolom Aksi
+tabel.querySelector("thead tr th:last-child").remove();
+
+// Hapus kolom aksi pada setiap baris
+tabel.querySelectorAll("tbody tr").forEach(row => {
+    let aksiCell = row.querySelector("td:last-child");
+    if (aksiCell) aksiCell.remove();
+});
+
+let isi = tabel.outerHTML;
+
+let w=window.open("","","width=1000,height=700");
+
+w.document.write(`
+<html>
+<head>
+<title>Laporan</title>
+<style>
+body{font-family:Arial;padding:20px}
+table{width:100%;border-collapse:collapse}
+table,th,td{border:1px solid #000;padding:8px}
+th{background:#ddd}
+.ttd td{border:none;text-align:center}
+</style>
+</head>
+<body>
+
+<h2 align="center">LAPORAN KEUANGAN MASJID AL-HIJRAH</h2>
+
+${isi}
+
+<br><br>
+
+<table class="ttd">
+
+<tr>
+
+<td>
+Mengetahui,<br>
+Ketua DKM
+<br><br><br><br><br>
+<u>${namaKetua}</u>
+</td>
+
+<td>
+<br><br>
+[ STEMPEL MASJID ]
+</td>
+
+<td>
+Bendahara
+<br><br><br><br><br>
+<u>${namaBendahara}</u>
+</td>
+
+</tr>
+
+</table>
+
+<br>
+
+<div align="center">
+© 2026 BurhanFath | Sistem Keuangan Masjid Al-Hijrah
+</div>
+
+<script>
+window.print();
+<\/script>
+
+</body>
+</html>
+`);
+
+w.document.close();
+
+}
+
+isiTahun();
+loadPengurus();
+tampilkanData();
+
+</script>
+
+</body>
+</html>
